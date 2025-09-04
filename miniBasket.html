@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>ミニバスケ - 松柏祭r71-5</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: sans-serif;
+        text-align: center;
+        margin-top: 50px;
+      }
+      h1 {
+        color: #333;
+      }
+      .status-container {
+        margin-top: 30px;
+      }
+      .status-button {
+        padding: 15px 30px;
+        font-size: 16px;
+        margin: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+        transition: background-color 0.3s;
+      }
+      .empty {
+        background-color: #4caf50;
+      } /* 空き */
+      .busy {
+        background-color: #ffc107;
+      } /* やや混雑 */
+      .crowded {
+        background-color: #f44336;
+      } /* 混雑 */
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  </head>
+  <body>
+    <h1 id="booth-name-display"></h1>
+    <div class="status-container">
+      <button class="status-button empty" data-status="空き">空き</button>
+      <button class="status-button busy" data-status="やや混雑">
+        やや混雑
+      </button>
+      <button class="status-button crowded" data-status="混雑">混雑</button>
+    </div>
+
+    <p id="message"></p>
+
+    <script>
+      // **ここをFirebaseコンソールからコピーした情報に置き換えてください**
+      const firebaseConfig = {
+        apiKey: "AIzaSyAKFXx_Lg3uVVHZPagCXfBOFNlfyi57FXs",
+        authDomain: "shohakusaiszn126-1-5.firebaseapp.com",
+        databaseURL: "https://shohakusaiszn126-1-5-default-rtdb.firebaseio.com",
+        projectId: "shohakusaiszn126-1-5",
+        storageBucket: "shohakusaiszn126-1-5.firebasestorage.app",
+        messagingSenderId: "716915522027",
+        appId: "1:716915522027:web:15de0202348ee194bd41ae",
+        measurementId: "G-2R1T2P33L8",
+      };
+
+      // Firebaseの初期化
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+
+      // どのブースかを示すIDと、表示名を設定します。
+      // **ここをブースごとに変更してください。**
+      const boothData = {
+        id: "miniBasket",
+        name: "ミニバスケ",
+      };
+
+      // 画面にブース名を表示
+      document.getElementById("booth-name-display").textContent =
+        boothData.name + " の混雑状況";
+
+      // 以下は変更する必要はありません
+      const buttons = document.querySelectorAll(".status-button");
+      const messageElement = document.getElementById("message");
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const status = button.getAttribute("data-status");
+          const boothRef = database.ref("booths/" + boothData.id);
+
+          // データベースにデータを送信
+          boothRef
+            .update({
+              name: boothData.name, // ブース名も一緒に送信
+              status: status,
+              updatedAt: firebase.database.ServerValue.TIMESTAMP,
+            })
+            .then(() => {
+              messageElement.textContent = `混雑状況を「${status}」に更新しました！`;
+              messageElement.style.color = "green";
+            })
+            .catch((error) => {
+              messageElement.textContent =
+                "更新に失敗しました: " + error.message;
+              messageElement.style.color = "red";
+              console.error("更新エラー:", error);
+            });
+        });
+      });
+    </script>
+  </body>
+</html>
